@@ -16,4 +16,4 @@
 
 .env
 
-logging/logs/*
+logging/logs/app*
