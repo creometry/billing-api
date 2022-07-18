@@ -6,6 +6,7 @@ import (
 
 	data "billing-api/data"
 	models "billing-api/models"
+	utils "billing-api/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -37,7 +38,10 @@ func CreateBillingAccount(c *gin.Context) {
 	}
 
 	if result := DB.Table("billing_accounts").Create(&accountDetails); result.Error != nil {
-		c.AbortWithError(http.StatusNotFound, result.Error)
+
+		ApiError := utils.NewAPIError(409, "Conflict", "Database error", "UUID already exists", "UUID already exists")
+		// c.JSON(http.StatusConflict, ApiError)
+		c.JSON(http.StatusConflict, ApiError)
 		return
 	}
 
@@ -51,10 +55,34 @@ func GetBillingAccount(c *gin.Context) {
 
 	var BillingAccount models.BillingAccount
 
-	if result := DB.Find(&BillingAccount, uuid); result.Error != nil {
+	if result := DB.Find(&BillingAccount, "uuid = ?", uuid); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)
 		return
 	}
 
 	c.JSON(http.StatusOK, &BillingAccount)
+}
+
+func GetBillingAccountsByAdminUUID(c *gin.Context) {
+	uuid := c.Param("uuid")
+	var adminDetails models.AdminDetails
+	var BillingAccounts []models.BillingAccount
+
+	_ = BillingAccounts
+
+	if result := DB.First(&adminDetails, "uuid = ?", uuid); result.Error != nil {
+		c.AbortWithError(http.StatusNotFound, result.Error)
+		return
+	}
+
+	// if result := DB.Find(&BillingAccounts, "uuid = ?", uuid); result.Error != nil {
+	// 	c.AbortWithError(http.StatusNotFound, result.Error)
+	// 	return
+	// }
+
+	// DB.Model(&adminDetails).Select("adminDetails.uuid").Joins("left join billing_accounts on billing_accounts.uuid = users.id").Scan(&result{})
+
+	// c.JSON(http.StatusOK, &BillingAccounts)
+	c.JSON(http.StatusOK, &adminDetails)
+
 }

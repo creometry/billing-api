@@ -1,10 +1,9 @@
 package main
 
 import (
-	config "billing-api/config"
 	data "billing-api/data"
 	log "billing-api/logging"
-	// Router "billing-api/router"
+	Router "billing-api/router"
 )
 
 func main() {
@@ -15,17 +14,14 @@ func main() {
 
 	data.ParseFiles()
 
-	// db, err := data.InitializeDB()
-	// if err != nil {
-	// 	log.Fatal(log.ConfigError, err)
-	// }
-
-	error := config.LoadDotEnvVariables()
-	if error != nil {
-		log.Fatal(log.ConfigError, error)
+	db, err := data.InitializeDB()
+	if err != nil {
+		log.Fatal(log.ConfigError, err)
 	}
 
-	// Router.SetupRouter(db)
+	data.InitializeMigrations()
+
+	Router.SetupRouter(db)
 	// log.Error(log.ConfigError, "Testing the error")
 
 }

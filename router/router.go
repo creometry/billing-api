@@ -16,5 +16,6 @@ func SetupRouter(db *gorm.DB) {
 	router := gin.Default()
 	router.POST("/v1/CreateBillingAccount", controllers.CreateBillingAccount)
 	router.GET("/v1/getBillingAccount/:uuid", controllers.GetBillingAccount)
+	router.GET("/v1/GetBillingAccountsByAdminUUID/:uuid", controllers.GetBillingAccountsByAdminUUID)
 	router.Run("localhost:8080")
 }

@@ -2,7 +2,6 @@ package config
 
 import (
 	log "billing-api/logging"
-	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/k0kubun/pp"
@@ -10,6 +9,7 @@ import (
 
 func LoadDotEnvVariables() error {
 
+	pp.Println("loading environnement variables from .env file")
 	// // load .env file
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -17,6 +17,5 @@ func LoadDotEnvVariables() error {
 		return err
 	}
 
-	pp.Println("Postgresqlpassword", os.Getenv("Postgresqlpassword"))
 	return nil
 }

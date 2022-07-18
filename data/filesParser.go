@@ -14,15 +14,7 @@ var (
 
 func parsePlansPricing() {
 	//TODO: make ths function scan all files inside config/plans/ and make env variable by "filename:contentOfFile"
-	// var StarterPrice float64
-	// var ProPrice float64
-	// var ElitePrice float64
 
-	path, err := os.Getwd()
-	if err != nil {
-		log.Error(log.ConfigError, err)
-	}
-	fmt.Println(path)
 	file1, err1 := os.Open("data/pricing/plans/StarterPrice.txt")
 	if err1 != nil {
 		log.Error("error parsing Starter plan price ", err1)

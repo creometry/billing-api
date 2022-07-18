@@ -22,12 +22,12 @@ const (
 
 type Project struct {
 	gorm.Model
-	ProjectId           uuid.UUID  `json:"projectId" gorm:"primaryKey"`
+	ProjectId           uuid.UUID  `json:"projectId" gorm:"primaryKey;unique"`
 	ClusterId           uuid.UUID  `json:"clusterId"`
 	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
 	State               string     `json:"State"`
 	Plan                Plan       `json:"accountType"`
-	History             []BillFile `json:"history" gorm:"foreignKey:BillingAccountRefer"`
+	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
 }
 
@@ -52,18 +52,19 @@ type BillFile struct {
 	BillingDate         time.Time `json:"BillingDate" gorm:"primaryKey"`
 	PdfLink             string    `json:"pdfLink"`
 	Amount              float64   `json:"amount"`
+	ProjectRefer        string    `json:"ProjectRefer"`
 	BillingAccountRefer uint
 }
 
 type BillingAccount struct {
 	gorm.Model
 	UUID             uuid.UUID      `json:"uuid" gorm:"primaryKey;unique"`
-	BillingAdmins    []AdminDetails `json:"billingAdmins" gorm:"-"`
+	BillingAdmins    []AdminDetails `json:"billingAdmins" gorm:"many2many:BillingAccount_Admin;"`
 	BillingStartDate time.Time      `json:"billingStartDate"`
 	Balance          float64        `json:"balance"`
 	IsActive         bool           `json:"isActive"`
 	Company          Company        `json:"company" gorm:"embedded"`
-	Projects         []Project      `json:"projects" gorm:"foreignKey:BillingAccountRefer"`
+	Projects         []Project      `json:"projects" gorm:"foreignKey:BillingAccountRefer;references:UUID"`
 }
 
 type CreateBillingAccount struct {
