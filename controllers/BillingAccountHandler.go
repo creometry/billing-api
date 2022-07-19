@@ -26,7 +26,7 @@ func CreateBillingAccount(c *gin.Context) {
 		return
 	}
 
-	pp.Println("input", input)
+	// pp.Println("input", input)
 	accountDetails := models.BillingAccount{
 		UUID:             uuid.New(),
 		BillingAdmins:    input.BillingAdmins,
@@ -40,7 +40,6 @@ func CreateBillingAccount(c *gin.Context) {
 	if result := DB.Table("billing_accounts").Create(&accountDetails); result.Error != nil {
 
 		ApiError := utils.NewAPIError(409, "Conflict", "Database error", "UUID already exists", "UUID already exists")
-		// c.JSON(http.StatusConflict, ApiError)
 		c.JSON(http.StatusConflict, ApiError)
 		return
 	}
@@ -75,14 +74,18 @@ func GetBillingAccountsByAdminUUID(c *gin.Context) {
 		return
 	}
 
-	// if result := DB.Find(&BillingAccounts, "uuid = ?", uuid); result.Error != nil {
-	// 	c.AbortWithError(http.StatusNotFound, result.Error)
-	// 	return
-	// }
+	// Retrieve all billing accounts the admin's uuid is associated with
 
-	// DB.Model(&adminDetails).Select("adminDetails.uuid").Joins("left join billing_accounts on billing_accounts.uuid = users.id").Scan(&result{})
+	err := DB.Preload("Projects").
+		Preload("BillingAdmins").
+		Joins("INNER JOIN public.billing_account_admins ON public.billing_accounts.uuid = public.billing_account_admins.billing_account_uuid").
+		Where("public.billing_account_admins.admin_details_uuid = ?", uuid).
+		Find(&BillingAccounts).Error
 
-	// c.JSON(http.StatusOK, &BillingAccounts)
-	c.JSON(http.StatusOK, &adminDetails)
+	pp.Println("err", err)
+
+	pp.Println("BillingAccounts", BillingAccounts)
+
+	c.JSON(http.StatusOK, &BillingAccounts)
 
 }

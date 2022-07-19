@@ -20,6 +20,7 @@ const (
 	Elite            = "Elite"
 )
 
+// project_id and Cluster_id are taken from rancher
 type Project struct {
 	gorm.Model
 	ProjectId           uuid.UUID  `json:"projectId" gorm:"primaryKey;unique"`
