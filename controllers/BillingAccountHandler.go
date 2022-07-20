@@ -6,7 +6,7 @@ import (
 
 	data "billing-api/data"
 	models "billing-api/models"
-	utils "billing-api/utils"
+	"billing-api/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -87,5 +87,43 @@ func GetBillingAccountsByAdminUUID(c *gin.Context) {
 	pp.Println("BillingAccounts", BillingAccounts)
 
 	c.JSON(http.StatusOK, &BillingAccounts)
+
+}
+
+func AddProject(c *gin.Context) {
+	var input models.AddProjectModel
+	var billingAccount models.BillingAccount
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	pp.Println("input", input)
+
+	if result := DB.First(&billingAccount, "uuid = ?", input.BillingAccountUUID); result.Error != nil {
+
+		ApiError := utils.NewAPIError(404, "Not Found", "input error", "Billing account UUID does not exist", "")
+		c.JSON(http.StatusNotFound, ApiError)
+		return
+	}
+
+	newproject := models.Project{
+		ProjectId:           input.Project.ProjectId,
+		ClusterId:           input.Project.ClusterId,
+		CreationTimeStamp:   time.Time{},
+		State:               input.Project.State,
+		Plan:                input.Project.Plan,
+		History:             []models.BillFile{},
+		BillingAccountRefer: input.BillingAccountUUID.String(),
+	}
+
+	if result2 := DB.Create(&newproject); result2.Error != nil {
+
+		ApiError := utils.NewAPIError(500, "Internal Server Error", "Internal Server Error", "Could not create project", "")
+		c.JSON(http.StatusInternalServerError, ApiError)
+		return
+	}
+
+	c.JSON(http.StatusCreated, newproject)
 
 }

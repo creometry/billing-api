@@ -23,8 +23,8 @@ const (
 // project_id and Cluster_id are taken from rancher
 type Project struct {
 	gorm.Model
-	ProjectId           uuid.UUID  `json:"projectId" gorm:"primaryKey;unique"`
-	ClusterId           uuid.UUID  `json:"clusterId"`
+	ProjectId           string     `json:"projectId" gorm:"primaryKey;unique"`
+	ClusterId           string     `json:"clusterId"`
 	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
 	State               string     `json:"State"`
 	Plan                Plan       `json:"accountType"`
@@ -72,4 +72,10 @@ type CreateBillingAccount struct {
 	BillingAdmins []AdminDetails `json:"billingAdmins"`
 	Company       Company        `json:"company"`
 	Projects      []Project      `json:"projects"`
+}
+
+type AddProjectModel struct {
+	BillingAccountUUID uuid.UUID `json:"billing_account_uuid"`
+	Project_id         string    `json:"project_id"`
+	Project            Project   `json:"project"`
 }
