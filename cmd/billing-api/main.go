@@ -4,6 +4,7 @@ import (
 	data "billing-api/data"
 	log "billing-api/logging"
 	Router "billing-api/router"
+	"billing-api/utils"
 )
 
 func main() {
@@ -13,6 +14,8 @@ func main() {
 	// }
 
 	data.ParseFiles()
+
+	utils.GetKubernetesClient()
 
 	db, err := data.InitializeDB()
 	if err != nil {
