@@ -1,9 +1,10 @@
 package main
 
 import (
-	"billing-api/controllers"
 	data "billing-api/data"
+	billingoperations "billing-api/internal/billing-operations"
 	log "billing-api/logging"
+
 	Router "billing-api/router"
 	"billing-api/utils"
 )
@@ -25,9 +26,9 @@ func main() {
 
 	data.InitializeMigrations()
 
+	billingoperations.Generatebills()
+
 	Router.SetupRouter(db)
 	// log.Error(log.ConfigError, "Testing the error")
-
-	controllers.Generatebills()
 
 }

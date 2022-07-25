@@ -7,7 +7,6 @@ import (
 	config "billing-api/config"
 	models "billing-api/models"
 
-	"github.com/k0kubun/pp"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,7 +19,6 @@ var DB *gorm.DB = nil
 
 func InitializeDB() (*gorm.DB, error) {
 	config.LoadDotEnvVariables()
-	pp.Println("Postgresqlhost", os.Getenv("Postgresqlhost"))
 	dsn := "host=" + os.Getenv("Postgresqlhost") + " user=" + os.Getenv("Postgresqluser") + " password=" + os.Getenv("Postgresqlpassword") + " dbname=" + os.Getenv("Postgresqldbname") + " port=" + os.Getenv("Postgresqlport")
 	//+ " TimeZone=" + os.Getenv("PostgresqlTimezone")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

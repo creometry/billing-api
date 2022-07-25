@@ -7,6 +7,7 @@ import (
 	"github.com/k0kubun/pp"
 )
 
+//TODO: this function is called multiple times while it should be called only once
 func LoadDotEnvVariables() error {
 
 	pp.Println("loading environnement variables from .env file")

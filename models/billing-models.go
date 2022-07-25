@@ -29,7 +29,7 @@ type Project struct {
 	ProjectId           string     `json:"projectId" gorm:"primaryKey;unique"`
 	ClusterId           string     `json:"clusterId"`
 	ProjectCreationTS   time.Time  `json:"projectCreationTS"`
-	Plan                Plan       `json:"accountType"`
+	Plan                Plan       `json:"plan"`
 	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
 	State               string     `json:"State"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
