@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: billing-api
+  template:
+    metadata:
+      labels:
+        app: billing-api
+    spec:
+      
+      volumes:
+        - name: env-variables
+          configMap:
+            name: billing-api-configmap
+        - name: pricing-plan
+          configMap:
+            name: pricing-plans
+        - name: logging-file
+      containers:
+      - name: billing-api-container
+        image: billing-api:0.1
+        volumeMounts:
+          - mountPath: .env
+            name: env-variables
+          - mountPath: root/data/pricing/plans/
+            name: pricing-plan
+          - mountPath: /home/nejah/logging/logs
+            name: logging-file
+        env:
+          - name: Postgresqluser
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_USER
+                name: postgresql-secret
+          - name: Postgresqldbname
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: postgresql-configmap      
+          - name: Postgresqlpassword
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_PASSWORD
+                name: postgresql-secret      
+        envFrom:
+          - configMapRef:
+              name: billing-api-configmap
+        ports:
+        - containerPort: 8080
+          
