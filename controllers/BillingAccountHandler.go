@@ -105,6 +105,7 @@ func GetBillingAccountsByAdminUUID(c *gin.Context) {
 }
 
 func AddProject(c *gin.Context) {
+
 	var input models.AddProjectModel
 	var billingAccount models.BillingAccount
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -122,11 +123,11 @@ func AddProject(c *gin.Context) {
 	}
 
 	newproject := models.Project{
-		ProjectId:           input.Project.ProjectId,
-		ClusterId:           input.Project.ClusterId,
-		CreationTimeStamp:   time.Time{},
-		State:               input.Project.State,
-		Plan:                input.Project.Plan,
+		ProjectId:           input.ProjectId,
+		ClusterId:           input.ClusterId,
+		CreationTimeStamp:   input.CreationTimeStamp,
+		State:               input.State,
+		Plan:                input.Plan,
 		History:             []models.BillFile{},
 		BillingAccountRefer: input.BillingAccountUUID.String(),
 	}
