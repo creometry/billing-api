@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kubecost/opencost/pkg/kubecost"
 	"gorm.io/gorm"
 )
 
@@ -20,15 +21,17 @@ const (
 	Elite            = "Elite"
 )
 
+var Plans = []Plan{"Starter", "Pro", "Elite"}
+
 // project_id and Cluster_id are taken from rancher
 type Project struct {
 	gorm.Model
 	ProjectId           string     `json:"projectId" gorm:"primaryKey;unique"`
 	ClusterId           string     `json:"clusterId"`
-	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
-	State               string     `json:"State"`
+	ProjectCreationTS   time.Time  `json:"projectCreationTS"`
 	Plan                Plan       `json:"accountType"`
 	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
+	State               string     `json:"State"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
 }
 
@@ -63,7 +66,6 @@ type BillingAccount struct {
 	BillingAdmins    []AdminDetails `json:"billingAdmins" gorm:"many2many:BillingAccount_Admin;"`
 	BillingStartDate time.Time      `json:"billingStartDate"`
 	Balance          float64        `json:"balance"`
-	IsActive         bool           `json:"isActive"`
 	Company          Company        `json:"company" gorm:"embedded"`
 	Projects         []Project      `json:"projects" gorm:"foreignKey:BillingAccountRefer;references:UUID"`
 }
@@ -78,4 +80,27 @@ type AddProjectModel struct {
 	BillingAccountUUID uuid.UUID `json:"billing_account_uuid"`
 	Project_id         string    `json:"project_id"`
 	Project            Project   `json:"project"`
+}
+
+type AllocationResponse struct {
+	Code int                              `json:"code"`
+	Data []map[string]kubecost.Allocation `json:"data"`
+}
+
+type Metrics struct {
+	CPUCoreHours         float64
+	CpuAverageUsage      float64
+	RamByteMinutes       float64
+	RamAverageUsage      float64
+	NetworkTransferBytes float64
+	NetworkReceiveBytes  float64
+	PvByteHours          float64
+}
+
+type ResourcePricing struct {
+	CPUCoreHourPrice          float64
+	MemoryByteHourPrice       float64
+	NetworkReceiveBytesPrice  float64
+	NetworkTransferBytesPrice float64
+	PVByteHourPrice           float64
 }

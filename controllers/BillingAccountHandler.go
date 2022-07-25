@@ -2,8 +2,12 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	data "billing-api/data"
@@ -24,6 +28,8 @@ func CreateBillingAccount(c *gin.Context) {
 
 	// Validate input
 
+	//TODO: generate UUID for each newly created billing account
+
 	var input models.CreateBillingAccount
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -36,7 +42,6 @@ func CreateBillingAccount(c *gin.Context) {
 		BillingAdmins:    input.BillingAdmins,
 		BillingStartDate: time.Now(),
 		Balance:          0.0,
-		IsActive:         true,
 		Company:          input.Company,
 		Projects:         input.Projects,
 	}
@@ -124,7 +129,7 @@ func AddProject(c *gin.Context) {
 	newproject := models.Project{
 		ProjectId:           input.Project.ProjectId,
 		ClusterId:           input.Project.ClusterId,
-		CreationTimeStamp:   time.Time{},
+		ProjectCreationTS:   time.Time{},
 		State:               input.Project.State,
 		Plan:                input.Project.Plan,
 		History:             []models.BillFile{},
@@ -196,4 +201,180 @@ func ListBillingAccountNamespaces(c *gin.Context) {
 
 	// return projectsNamespaces array
 	c.JSON(http.StatusOK, &BillingAccountNamespaces)
+}
+
+func getBillingAccountNamespaces(billingAccount_uuid uuid.UUID) ([]string, error) {
+	var BillingAccountNamespaces []string
+	//get billing account by uuid
+	billingAccount, err := fetchBillingAccountbyuuid(billingAccount_uuid.String())
+	if err != nil {
+		logging.Error(logging.HTTPError, err)
+	}
+
+	// loop over billing account projects and add their namespace to BillingAccountNamespaces array
+	for _, project := range billingAccount.Projects {
+		projectNamespace, err := ListProjectNamespaces(project.ProjectId)
+		if err != nil {
+			logging.Error(logging.HTTPError, err)
+			return nil, err
+		}
+		BillingAccountNamespaces = append(BillingAccountNamespaces, projectNamespace...)
+	}
+
+	// return projectsNamespaces array
+	return BillingAccountNamespaces, nil
+}
+
+func getNamespaceMetrics(namespaceId string) (models.Metrics, error) {
+	var kubecostUrl string
+	// ** kubecost allocation params: **
+	// ref : https://github.com/kubecost/docs/blob/main/allocation.md
+
+	// window of billed time
+	window := "month"
+	// accumulate results (kubecost returns dates seperated by day if this is false (default value) )
+	accumulte := "true"
+	//field by wich to aggrgate results
+	aggregate := "namespace"
+	// select namespace by which to filter results
+	filterNamespaces := namespaceId
+
+	// kubecostUrl := "kubecost-cost-analyzer"
+	if os.Getenv("APP_ENV") == "development" {
+		kubecostUrl = "localhost"
+	} else {
+		kubecostUrl = "kubecost-cost-analyzer"
+	}
+
+	// kubecost metrics api
+	url := "http://" + kubecostUrl + ":9090/model/allocation?window=" + window + "&accumulate=" + accumulte + "&aggregate=" + aggregate + "&filterNamespaces=" + filterNamespaces
+
+	resp, err := http.Get(url)
+	if err != nil {
+		logging.Error(logging.HTTPError, "No response from Kubecost!"+err.Error())
+		return models.AllocationResponse{}, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	kubecostResponse := models.AllocationResponse{}
+	jsonErr := json.Unmarshal(body, &kubecostResponse)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	// pp.Println(kubecostResponse)
+
+	namespaceMetrics := models.Metrics{
+		CPUCoreHours:         kubecostResponse.Data[0]["__idle__"].CPUCoreHours,
+		CpuAverageUsage:      kubecostResponse.Data[0]["__idle__"].CPUCoreUsageAverage,
+		RamByteMinutes:       kubecostResponse.Data[0]["__idle__"].RAMByteHours,
+		RamAverageUsage:      kubecostResponse.Data[0]["__idle__"].RAMBytesUsageAverage,
+		NetworkTransferBytes: kubecostResponse.Data[0]["__idle__"].NetworkTransferBytes,
+		NetworkReceiveBytes:  kubecostResponse.Data[0]["__idle__"].NetworkReceiveBytes,
+		//TODO: calculate PV total
+		// pvByteHours: metrics.Data[0]["__idle__"].PVs,
+	}
+	return namespaceMetrics, nil
+}
+
+func calculateConsumedCredit(namespaceMetrics models.Metrics) float64 {
+	var consumedCredit float64
+
+	resourcepricing := data.GetResourcesPrices()
+
+	RamByteHours := namespaceMetrics.RamByteMinutes / 60
+	consumedCredit += RamByteHours * resourcepricing.MemoryByteHourPrice
+	consumedCredit += namespaceMetrics.CpuAverageUsage * resourcepricing.CPUCoreHourPrice
+	consumedCredit += namespaceMetrics.PvByteHours * resourcepricing.PVByteHourPrice
+	consumedCredit += namespaceMetrics.NetworkReceiveBytes * resourcepricing.NetworkReceiveBytesPrice
+	consumedCredit += namespaceMetrics.NetworkTransferBytes * resourcepricing.NetworkTransferBytesPrice
+
+	return consumedCredit
+}
+
+func getBillingAccountConsumedCredit(billingAccount models.BillingAccount) (float64, error) {
+	var billingAccountConsumedCredit float64
+	// get billing account namespaces
+	for _, project := range billingAccount.Projects {
+		if project.Plan == "PayPerUse" {
+			projectNamespace, err := ListProjectNamespaces(project.ProjectId)
+			if err != nil {
+				logging.Error(logging.HTTPError, err)
+				return 0.0, err
+			}
+
+			// get metrics for each namespace
+			for _, namespace := range projectNamespace {
+				namespaceMetrics, err := getNamespaceMetrics(namespace)
+				if err != nil {
+					logging.Error(logging.HTTPError, err)
+					return 0.0, err
+				}
+
+				// calculate consumed credit for each namespace
+				consumedCredit := calculateConsumedCredit(namespaceMetrics)
+
+				// update billing account consumed credit
+				billingAccountConsumedCredit += consumedCredit
+			}
+		} else if utils.Contains(models.Plans, project.Plan) {
+			planPrice, err := data.GetPlanPrice(project.Plan)
+			if err != nil {
+				logging.Error(logging.ConfigError, err)
+				return 0.0, err
+			}
+			billingAccountConsumedCredit += planPrice
+		}
+	}
+	// get billing account consumed credit by making the sum of all credit consumed by namespaces
+	// return consumed credit
+	return billingAccountConsumedCredit, nil
+}
+
+func updateBillingAccountBalence(billingAccount models.BillingAccount) {
+	consumedCredit, err := getBillingAccountConsumedCredit(billingAccount)
+	if err != nil {
+		logging.Error(logging.HTTPError, err)
+	}
+	_ = consumedCredit
+	//TODO: update billing account balance
+	billingAccount.Balance = billingAccount.Balance - consumedCredit
+}
+
+func fetchAllBillingAccounts() ([]models.BillingAccount, error) {
+	var billingAccounts []models.BillingAccount
+	if result := DB.Find(&billingAccounts); result.Error != nil {
+		logging.Error(logging.HTTPError, result.Error)
+		return nil, result.Error
+	}
+	return billingAccounts, nil
+}
+
+//TODO: implement generateAndSavePDF() function
+func generateAndSavePDF() string {
+	return "pdf saved!"
+}
+
+//TODO: write function that generates bills for each billing account when 5 days before next billing cycle
+func generatebills() {
+	// get billing accounts within 5 days of the next billing cycle
+	billingAccounts, err := fetchAllBillingAccounts()
+	if err != nil {
+		logging.Error(logging.HTTPError, err)
+	}
+
+	for _, billingAccount := range billingAccounts {
+		// TODO: verify this date comparaison works
+		if billingAccount.BillingStartDate.Add(-5*24*time.Hour).Day() == time.Now().Day() {
+			// get billing account consumed credit
+			updateBillingAccountBalence(billingAccount)
+			if err != nil {
+				logging.Error(logging.HTTPError, err)
+			}
+
+		}
+
+		// generate pdf
+	}
 }
