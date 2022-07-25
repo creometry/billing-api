@@ -44,35 +44,35 @@ func parsePlansPricing() {
 func parseResourcePricing() models.ResourcePricing {
 	resourcepricing := models.ResourcePricing{}
 
-	file1, err1 := os.Open("./config/pricing/CPUCoreHourPrice.txt")
+	file1, err1 := os.Open("./data/pricing/CPUCoreHourPrice.txt")
 	if err1 != nil {
 		log.Fatal("error parsing MemoryByteHourPrice ", err1)
 	}
 	defer file1.Close()
 	fmt.Fscan(file1, &resourcepricing.MemoryByteHourPrice)
 
-	file2, err2 := os.Open("./config/pricing/CPUCoreHourPrice.txt")
+	file2, err2 := os.Open("./data/pricing/CPUCoreHourPrice.txt")
 	if err2 != nil {
 		log.Fatal("error parsing CPUCoreHourPrice ", err2)
 	}
 	defer file2.Close()
 	fmt.Fscan(file2, &resourcepricing.CPUCoreHourPrice)
 
-	file3, err3 := os.Open("./config/pricing/networkReceiveBytesPrice.txt")
+	file3, err3 := os.Open("./data/pricing/networkReceiveBytesPrice.txt")
 	if err3 != nil {
 		log.Fatal("error parsing networkReceiveBytesPrice ", err3)
 	}
 	defer file3.Close()
 	fmt.Fscan(file3, &resourcepricing.NetworkReceiveBytesPrice)
 
-	file4, err4 := os.Open("./config/pricing/networkTransferBytesPrice.txt")
+	file4, err4 := os.Open("./data/pricing/networkTransferBytesPrice.txt")
 	if err4 != nil {
 		log.Fatal("error parsing networkTransferBytesPrice ", err4)
 	}
 	defer file4.Close()
 	fmt.Fscan(file4, &resourcepricing.NetworkTransferBytesPrice)
 
-	file5, err5 := os.Open("./config/pricing/PVByteHourPrice.txt")
+	file5, err5 := os.Open("./data/pricing/PVByteHourPrice.txt")
 	if err5 != nil {
 		log.Fatal("error parsing PVByteHourPrice ", err5)
 	}
