@@ -252,7 +252,7 @@ func getNamespaceMetrics(namespaceId string) (models.Metrics, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		logging.Error(logging.HTTPError, "No response from Kubecost!"+err.Error())
-		return models.AllocationResponse{}, err
+		return models.Metrics{}, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -357,7 +357,7 @@ func generateAndSavePDF() string {
 }
 
 //TODO: write function that generates bills for each billing account when 5 days before next billing cycle
-func generatebills() {
+func Generatebills() {
 	// get billing accounts within 5 days of the next billing cycle
 	billingAccounts, err := fetchAllBillingAccounts()
 	if err != nil {

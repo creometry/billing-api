@@ -1,6 +1,7 @@
 package main
 
 import (
+	"billing-api/controllers"
 	data "billing-api/data"
 	log "billing-api/logging"
 	Router "billing-api/router"
@@ -26,5 +27,7 @@ func main() {
 
 	Router.SetupRouter(db)
 	// log.Error(log.ConfigError, "Testing the error")
+
+	controllers.Generatebills()
 
 }
