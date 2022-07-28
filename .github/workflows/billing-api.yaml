@@ -35,5 +35,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: creometry/billing:v0.0.1
-          cache-from: type=registry,ref=${{ secrets.USERNAME }}/simplewhale:buildcache
-          cache-to: type=registry,ref=${{ secrets.BILLING_API_SECRET }}/simplewhale:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.USERNAME }}/billing:buildcache
+          cache-to: type=registry,ref=${{ secrets.BILLING_API_SECRET }}/billing:buildcache,mode=max
