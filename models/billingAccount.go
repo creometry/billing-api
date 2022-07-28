@@ -27,7 +27,7 @@ type Project struct {
 	ClusterId           string     `json:"clusterId"`
 	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
 	State               string     `json:"State"`
-	Plan                Plan       `json:"accountType"`
+	Plan                Plan       `json:"plan"`
 	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
 }
@@ -76,6 +76,9 @@ type CreateBillingAccount struct {
 
 type AddProjectModel struct {
 	BillingAccountUUID uuid.UUID `json:"billing_account_uuid"`
-	Project_id         string    `json:"project_id"`
-	Project            Project   `json:"project"`
+	ProjectId          string    `json:"project_id"`
+	ClusterId          string    `json:"clusterId"`
+	CreationTimeStamp  time.Time `json:"creationTimeStamp"`
+	Plan               Plan      `json:"plan"`
+	State              string    `json:"state"`
 }

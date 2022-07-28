@@ -5,18 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"k8s.io/client-go/kubernetes"
 )
 
-func SetupRouter(db *gorm.DB) {
+type Namespace struct {
+	ClientSet *kubernetes.Clientset
+}
 
-	// db.Migrator().CreateTable(&BillingAccount{})
-	// db.Migrator().CreateTable(&Company{})
-	// db.Migrator().CreateTable(&Project{})
+func SetupRouter(db *gorm.DB) {
 
 	router := gin.Default()
 	router.POST("/v1/CreateBillingAccount", controllers.CreateBillingAccount)
 	router.GET("/v1/getBillingAccount/:uuid", controllers.GetBillingAccount)
 	router.GET("/v1/GetBillingAccountsByAdminUUID/:uuid", controllers.GetBillingAccountsByAdminUUID)
 	router.POST("/v1/addProject", controllers.AddProject)
+	router.GET("/v1/listBillingAccountNamespaces", controllers.ListBillingAccountNamespaces)
 	router.Run("localhost:8080")
 }

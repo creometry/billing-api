@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      table { 
+	width: 100%; 
+	border-collapse: collapse; 
+	margin:20px auto;
+	}
+
+
+  .line {
+      display: flex;
+}
+/* Zebra striping */
+tr:nth-of-type(odd) { 
+	background: #eee; 
+	}
+
+th { 
+	background: #3498db; 
+	color: white; 
+	font-weight: bold; 
+	}
+
+td, th { 
+	padding: 10px; 
+	border: 1px solid #ccc; 
+	text-align: left; 
+	font-size: 18px;
+	}
+
+/* 
+Max width before this PARTICULAR table gets nasty
+This query will take effect for any screen smaller than 760px
+and also iPads specifically.
+*/
+
+	
+
+	
+	
+	
+	
+	tr { border: 1px solid #ccc; }
+	
+	td { 
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee; 
+		position: relative;
+	}
+
+	td:before { 
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 100%; 
+		padding-right: 10px; 
+		white-space: nowrap;
+		/* Label the data */
+		content: attr(data-column);
+
+		color: #000;
+		font-weight: bold;
+	}
+
+
+    </style>
+  </head>
+  <body >
+    <div class="line">
+      <h3>UUID:</h3>
+      <p > {{.UUID}}</p>
+    </div>
+    <h2>List of Admins </h2>
+    <table>
+      <thead>
+        <tr>
+          <td>UUID</td>
+          <td>Email</td>
+          <td>Phone Number</td>
+          <td>Name</td>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .BillingAdmins}}
+        <tr>
+          <td>{{.UUID}}</td>
+          <td>{{.Email}}</td>
+          <td>{{.Phone_number}}</td>
+          <td>{{.Name}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    <div class="line">
+      <h2>Your balance is :</h2>
+      <p>{{.Balance}}</p>
+    </div>
+    
+    <h2>Started at :</h2>
+    <p>{{.BillingStartDate}}</p>
+
+    <table>
+      <thead>
+        <tr>
+          <td>ProjectId</td>
+          <td>ClusterId</td>
+          <td>State</td>
+          <td>billing account refer</td>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Projects}}
+        <tr>
+          <td>{{.ProjectId}}</td>
+          <td>{{.ClusterId}}</td>
+          <td>{{.State}}</td>
+          <td>{{.BillingAccountRefer}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </body>
+</html>
