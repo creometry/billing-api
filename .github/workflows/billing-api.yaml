@@ -60,7 +60,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'dockerhub/creometry/billing:${{ steps.meta.outputs.version }}'
+          image-ref: 'dockerhub/creometry/billing:v0.0.1'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
