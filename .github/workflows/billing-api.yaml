@@ -1,17 +1,14 @@
 name: billing-api-ci
 
-on: 
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]  
+on: [push]
+   
            
 jobs: 
 
   test:
 
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       packages: write
