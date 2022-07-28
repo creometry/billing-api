@@ -34,4 +34,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.USERNAME }}/creometry/billing:latest 
+          tags: ${{ secrets.USERNAME }}/creometry/billing:v0.0.1
