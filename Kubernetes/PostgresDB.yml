@@ -1,4 +1,25 @@
-# PostgreSQL StatefulSet
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql-secret
+type: Opaque
+data:
+  POSTGRES_PASSWORD: bXlwYXNzd29yZGJvYg==
+  POSTGRES_USER: Ym9ic3Fs
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-configmap
+  labels:
+    app: postgresql-db
+data:
+  PGDATA: /var/lib/postgresql/data/pgdata
+  POSTGRES_DB: creometry-billing
+  TZ: 'UTC+1'
+  PGTZ: 'UTC+1'
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -8,7 +29,7 @@ spec:
   selector:
     matchLabels:
       app: postgresql-db
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -19,7 +40,7 @@ spec:
         image: postgres:13-alpine
         ports:
           - containerPort: 5432
-      # Config from ConfigMap and Secret
+      # Configuration from ConfigMap and Secret
         envFrom:
         - secretRef:
             name: postgresql-secret
@@ -33,4 +54,16 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 25Gi
+          storage: 2Gi
+---    
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: postgresql-db      
