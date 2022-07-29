@@ -42,7 +42,7 @@ type Project struct {
 
 type AdminDetails struct {
 	gorm.Model
-	UUID                uuid.UUID `json:"uuid" gorm:"primaryKey"`
+	UUID                uuid.UUID `json:"uuid" gorm:"primaryKey;unique"`
 	Email               string    `json:"email"`
 	Phone_number        string    `json:"phone_number"`
 	Name                string    `json:"name"`

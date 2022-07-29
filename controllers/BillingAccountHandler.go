@@ -43,7 +43,9 @@ func CreateBillingAccount(c *gin.Context) {
 
 	if result := DB.Table("billing_accounts").Create(&accountDetails); result.Error != nil {
 
-		ApiError := utils.NewAPIError(409, "Conflict", "Database error", "UUID already exists", "UUID already exists")
+		pp.Println("result.Error", result.Error)
+
+		ApiError := utils.NewAPIError(409, "Conflict", "Database error", "UUID already exists", result.Error.Error())
 		c.JSON(http.StatusConflict, ApiError)
 		return
 	}
