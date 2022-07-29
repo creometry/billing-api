@@ -20,13 +20,21 @@ const (
 	Elite            = "Elite"
 )
 
-// project_id and Cluster_id are taken from rancher
+type State string
+
+const (
+	Grace  State = "Grace"
+	Closed       = "Closed"
+	Active       = "Active"
+)
+
+// project_id and Cluster_id are taken from rancher from the Id field (not the UUID)
 type Project struct {
 	gorm.Model
 	ProjectId           string     `json:"projectId" gorm:"primaryKey;unique"`
 	ClusterId           string     `json:"clusterId"`
 	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
-	State               string     `json:"State"`
+	State               State      `json:"State"`
 	Plan                Plan       `json:"plan"`
 	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
@@ -59,13 +67,14 @@ type BillFile struct {
 
 type BillingAccount struct {
 	gorm.Model
-	UUID             uuid.UUID      `json:"uuid" gorm:"primaryKey;unique"`
-	BillingAdmins    []AdminDetails `json:"billingAdmins" gorm:"many2many:BillingAccount_Admin;"`
-	BillingStartDate time.Time      `json:"billingStartDate"`
-	Balance          float64        `json:"balance"`
-	IsActive         bool           `json:"isActive"`
-	Company          Company        `json:"company" gorm:"embedded"`
-	Projects         []Project      `json:"projects" gorm:"foreignKey:BillingAccountRefer;references:UUID"`
+	UUID                            uuid.UUID      `json:"uuid" gorm:"primaryKey;unique"`
+	Name                            string         `json:"name"`
+	BillingAdmins                   []AdminDetails `json:"billingAdmins" gorm:"many2many:BillingAccount_Admin;"`
+	BillingAccountCreationTimestamp time.Time      `json:"BillingAccountCreationTimestamp"`
+	Balance                         float64        `json:"balance"`
+	IsActive                        bool           `json:"isActive"`
+	Company                         Company        `json:"company" gorm:"embedded"`
+	Projects                        []Project      `json:"projects" gorm:"foreignKey:BillingAccountRefer;references:UUID"`
 }
 
 type CreateBillingAccount struct {
@@ -80,5 +89,5 @@ type AddProjectModel struct {
 	ClusterId          string    `json:"clusterId"`
 	CreationTimeStamp  time.Time `json:"creationTimeStamp"`
 	Plan               Plan      `json:"plan"`
-	State              string    `json:"state"`
+	State              State     `json:"state"`
 }

@@ -32,13 +32,13 @@ func CreateBillingAccount(c *gin.Context) {
 
 	// pp.Println("input", input)
 	accountDetails := models.BillingAccount{
-		UUID:             uuid.New(),
-		BillingAdmins:    input.BillingAdmins,
-		BillingStartDate: time.Now(),
-		Balance:          0.0,
-		IsActive:         true,
-		Company:          input.Company,
-		Projects:         input.Projects,
+		//TODO: make defaults taken from struct
+		UUID:                            uuid.New(),
+		BillingAdmins:                   input.BillingAdmins,
+		BillingAccountCreationTimestamp: time.Now(),
+		Balance:                         0.0,
+		Company:                         input.Company,
+		Projects:                        input.Projects,
 	}
 
 	if result := DB.Table("billing_accounts").Create(&accountDetails); result.Error != nil {
