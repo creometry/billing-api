@@ -1,9 +1,12 @@
 name: billing-api-ci
 
-on: [push]
-  
-    # tags:
-      # - 'v*'
+on:
+  push:
+    branches:
+      - '2-add-github-actions'
+      - 'main'
+    tags:
+      - 'v*'
    
            
 jobs: 
@@ -63,11 +66,11 @@ jobs:
           cache-from: type=registry,ref=creometry/billing:buildcache
           cache-to: type=registry,ref=creometry/billing:buildcache,mode=max
 
-      - name: Sign the published Docker image
-        if: ${{ github.event_name != 'pull_request' }}
-        env:
-          COSIGN_EXPERIMENTAL: "true"
-        run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
+     # - name: Sign the published Docker image
+      #  if: ${{ github.event_name != 'pull_request' }}
+      #  env:
+      #    COSIGN_EXPERIMENTAL: "true"
+      #  run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
 
       - name: Run Trivy vulnerability scanner
