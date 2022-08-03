@@ -1,6 +1,11 @@
 name: billing-api-ci
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
    
            
 jobs: 
@@ -25,6 +30,13 @@ jobs:
         with:
           go-version: 1.18
 
+       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: creometry/billing
+
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
@@ -46,7 +58,8 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: creometry/billing:v0.0.1
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=creometry/billing:buildcache
           cache-to: type=registry,ref=creometry/billing:buildcache,mode=max
 
