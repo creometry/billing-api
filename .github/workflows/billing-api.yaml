@@ -1,8 +1,10 @@
 name: billing-api-ci
 
-on: [push]
-  
-      
+on:
+  push:
+    branches:
+      - '2-add-github-actions'
+      - 'main'
     tags:
       - 'v*'
    
