@@ -2,7 +2,8 @@ name: billing-api-ci
 
 on:
   push:
-    
+    branches:
+      
     tags:
       - 'v*'
    
