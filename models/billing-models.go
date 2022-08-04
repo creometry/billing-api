@@ -23,15 +23,23 @@ const (
 
 var Plans = []Plan{"Starter", "Pro", "Elite"}
 
-// project_id and Cluster_id are taken from rancher
+type State string
+
+const (
+	Grace  State = "Grace"
+	Closed       = "Closed"
+	Active       = "Active"
+)
+
+// project_id and Cluster_id are taken from rancher from the Id field (not the UUID)
 type Project struct {
 	gorm.Model
 	ProjectId           string     `json:"projectId" gorm:"primaryKey;unique"`
 	ClusterId           string     `json:"clusterId"`
-	ProjectCreationTS   time.Time  `json:"projectCreationTS"`
+	CreationTimeStamp   time.Time  `json:"creationTimeStamp"`
+	State               State      `json:"State"`
 	Plan                Plan       `json:"plan"`
 	History             []BillFile `json:"history" gorm:"foreignKey:ProjectRefer;references:ProjectId"`
-	State               string     `json:"State"`
 	BillingAccountRefer string     `json:"BillingAccountUUID"`
 }
 
@@ -78,10 +86,12 @@ type CreateBillingAccount struct {
 
 type AddProjectModel struct {
 	BillingAccountUUID uuid.UUID `json:"billing_account_uuid"`
-	Project_id         string    `json:"project_id"`
-	Project            Project   `json:"project"`
+	ProjectId          string    `json:"project_id"`
+	ClusterId          string    `json:"clusterId"`
+	CreationTimeStamp  time.Time `json:"creationTimeStamp"`
+	Plan               Plan      `json:"plan"`
+	State              State     `json:"state"`
 }
-
 type AllocationResponse struct {
 	Code int                              `json:"code"`
 	Data []map[string]kubecost.Allocation `json:"data"`

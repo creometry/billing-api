@@ -44,7 +44,7 @@ func parsePlansPricing() {
 func parseResourcePricing() models.ResourcePricing {
 	resourcepricing := models.ResourcePricing{}
 
-	file1, err1 := os.Open("./data/pricing/CPUCoreHourPrice.txt")
+	file1, err1 := os.Open("./data/pricing/MemoryByteHourPrice.txt")
 	if err1 != nil {
 		log.Fatal("error parsing MemoryByteHourPrice ", err1)
 	}
