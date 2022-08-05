@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "b22f8fd9-aad3-46aa-8c4a-0b8357596434",
+		"name": "billing-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7694049"
+	},
+	"item": [
+		{
+			"name": "CreateBillingAccount",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"billingAdmins\": [{\"uuid\": \"fb6db9dc-6be2-4d3a-b376-3f539f039f50\",\"email\": \"exmaleadmin@email.com\", \"phone_number\": \"21452012\", \"name\": \"mohsen2\"}],\n    \"accountType\": \"starter\",\n    \"company\": {\"IsCompany\": true, \"TaxId\": \"222-555\", \"Name\": \"mohsenlacharikalahou\"},\n    \"projects\": [{\n\"projectId\": \"fea5b671-819e-4697-942e-82cd9e94daf8\",\n\"clusterId\": \"7f432018-3f06-4c43-8dda-1578e5c61f29\",\n\"creationTimeStamp\": \"2022-07-12T07:28:09+00:00\",\n\"State\": \"active\",\n\"BillingAccountUUID\": \"b8369c1b-00e9-417b-b145-0a5f76d40550\",\n\"plan\": \"starter\"\n}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/v1/CreateBillingAccount",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"CreateBillingAccount"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getBillingAccount",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/getBillingAccount/:uuid",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"getBillingAccount",
+						":uuid"
+					],
+					"variable": [
+						{
+							"key": "uuid",
+							"value": "eb6214d4-985d-420a-882d-fb2a48aa60d0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetBillingAccountsByAdminUUID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/GetBillingAccountsByAdminUUID/:uuid",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"GetBillingAccountsByAdminUUID",
+						":uuid"
+					],
+					"variable": [
+						{
+							"key": "uuid",
+							"value": "00000000-0000-0000-0000-000000000000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addProject",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"billing_account_uuid\": \"66df1f22-c683-4411-8eef-1805312c9f52\",\n\t\"project_id\": \"c-cgzgf\",\n\t\"clusterId\": \"c-8shvl\",\n\t\"creationTimeStamp\": \"2022-07-25T15:09:58+00:00\",\n\t\"state\":\"Active\",\n\t\"plan\":\"Starter\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/v1/addProject",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addProject"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "listBillingAccountNamespaces",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/listBillingAccountNamespaces?billingAccount_uuid=4bdf0658-5bc5-4769-8ece-75fbf8745886",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"listBillingAccountNamespaces"
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "p-rdrgda",
+							"disabled": true
+						},
+						{
+							"key": "billingAccount_uuid",
+							"value": "4bdf0658-5bc5-4769-8ece-75fbf8745886"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

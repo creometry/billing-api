@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: billing-api-secret
+type: Opaque
+data:
+  RancherBearerToken: YWRtaW4=
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: billing-api-configmap
+data:
+  APP_ENV: development
+  Rancher_API_Url: https://localhost
+  Postgresqlhost: postgresql-service.default.svc.cluster.local
+  Postgresqlport: "5432"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: billing-api
+  template:
+    metadata:
+      labels:
+        app: billing-api
+    spec:
+      
+      volumes:
+        - name: env-variables
+          configMap:
+            name: billing-api-configmap
+        - name: pricing-plan
+          configMap:
+            name: pricing-plans
+        - name: logging-file
+      containers:
+      - name: billing-api-container
+        image: billing-api:0.1
+        volumeMounts:
+          - mountPath: .env
+            name: env-variables
+          - mountPath: app/data/pricing/plans/
+            name: pricing-plan
+          - mountPath: /home/nejah/logging/logs
+            name: logging-file
+        env:
+          - name: Postgresqluser
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_USER
+                name: postgresql-secret
+          - name: Postgresqldbname
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_DB
+                name: postgresql-configmap      
+          - name: Postgresqlpassword
+            valueFrom:
+              secretKeyRef:
+                key: POSTGRES_PASSWORD
+                name: postgresql-secret      
+        envFrom:
+          - configMapRef:
+              name: billing-api-configmap
+        ports:
+        - containerPort: 8080
+          
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-api-service
+spec:
+  selector:
+    app: billing-api
+  ports:
+  - port: 8080
